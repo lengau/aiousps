@@ -9,7 +9,7 @@ setup(
     version='0.4',
     author='Tobin Brown',
     author_email='tobin@brobin.me',
-    packages=['usps'],
+    packages=['usps', 'usps.aiousps'],
     include_package_data=True,
     url='http://github.com/brobin/usps-api',
     license='MIT',

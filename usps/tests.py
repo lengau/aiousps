@@ -1,11 +1,14 @@
+import asyncio
+
 import mock
 
 from lxml import etree
 
 from unittest import TestCase
 
-from .address import Address
-from .usps import USPSApi, USPSApiError
+from usps.address import Address
+from usps.usps import USPSApi, USPSApiError
+from usps.aiousps.usps import AsyncUSPSApi
 
 
 class USPSApiTestCase(TestCase):
@@ -67,6 +70,28 @@ class USPSApiTestCase(TestCase):
         address_mock.assert_called()
         track_mock.assert_called()
         ship_mock.assert_called()
+
+
+class AsyncUSPSApiTestCase(USPSApiTestCase):
+
+    def setUp(self):
+        self.usps = AsyncUSPSApi('XXXXXXXXXXXX', test=True)
+
+    @mock.patch('aiohttp.ClientSession')
+    def test_send_request_error(self, session_class_mock):
+        session_mock = session_class_mock.return_value.__aenter__.return_value
+        response_mock = session_mock.get.return_value
+        response_mock.text.return_value = b'<Error><Description>Test Error</Description></Error>'
+        with self.assertRaises(USPSApiError):
+            asyncio.run(self.usps.send_request('tracking', etree.Element('asdf')))
+
+    @mock.patch('aiohttp.ClientSession')
+    def test_send_request_valid(self, session_class_mock):
+        session_mock = session_class_mock.return_value.__aenter__.return_value
+        response_mock = session_mock.get.return_value
+        response_mock.text.return_value = b'<Valid>test</Valid>'
+        response = asyncio.run(self.usps.send_request('tracking', etree.Element('asdf')))
+        self.assertEqual(response, {'Valid': 'test'})
 
 
 class AddressTestCase(TestCase):
