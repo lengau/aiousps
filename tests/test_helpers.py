@@ -1,11 +1,11 @@
 """Tests for helper functions."""
 import itertools
 import string
-from typing import Any, Collection, Iterable, List, Tuple
+from typing import Any, Collection, List, Tuple
 from unittest import mock
 
 import pytest
-from hypothesis import Verbosity, given, settings, strategies
+from hypothesis import given, strategies
 
 from aiousps.helpers import enumerated_chunker, find_nonmatching_fields
 
@@ -17,6 +17,7 @@ ENUMERATED_CHUNKER_TEST_VALUES = [
 ]
 ELLIPSIS_ATTRS = dir(...)
 VALID_FIELD_INITIAL_CHARACTERS = string.ascii_letters + '_'
+
 
 @pytest.mark.parametrize(['iterable', 'n_items', 'expected'], ENUMERATED_CHUNKER_TEST_VALUES)
 def test_enumerated_chunker_pairs_expected(iterable, n_items, expected):
@@ -49,7 +50,8 @@ class TestFindNonmatchingFields:
 
         assert actual == []
 
-    @given(fields=strategies.lists(PYTHON_VALID_FIELD_STRATEGY.filter(lambda x: x not in ELLIPSIS_ATTRS), min_size=1, max_size=10))
+    @given(fields=strategies.lists(PYTHON_VALID_FIELD_STRATEGY.filter(lambda x: x not in ELLIPSIS_ATTRS), min_size=1,
+                                   max_size=10))
     def test_multiple_attributeerrors(self, fields):
         fake_item = ...
         fields_regex = ', '.join(['.+'] * len(fields))
@@ -65,5 +67,3 @@ class TestFindNonmatchingFields:
         actual = find_nonmatching_fields(mock_item, lambda _: False, *fields)
 
         assert actual == fields
-
-

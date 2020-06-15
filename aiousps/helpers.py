@@ -7,6 +7,7 @@ try:
 except ImportError:
     from xml import etree
 
+
 def enumerated_chunker(iterable, n_items):
     """A simple chunker that yields a list of up to `n_items` enumerated items from an iterator.
 
