@@ -21,5 +21,7 @@ class UspsEndpoint(enum.Enum):
     ZIP_CODE_LOOKUP = 'ZipCodeLookup'
 
 
-MAX_ADDRESSES_PER_TRANSACTION = 5
+class ApiQueryLimits(enum.IntEnum):
+    ADDRESSES = 5
+    TRACKING = 35
 

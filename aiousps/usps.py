@@ -1,14 +1,11 @@
-import itertools
-import json
 from typing import Iterable, Union
 
 import aiohttp
 import xmltodict
-
 from lxml import etree
 
 from . import Address
-from .constants import LABEL_ZPL, SERVICE_PRIORITY, USPS_BASE_URL, \
+from .constants import ApiQueryLimits, LABEL_ZPL, SERVICE_PRIORITY, USPS_BASE_URL, \
     USPS_ENCODING, UspsEndpoint
 from .helpers import enumerated_chunker
 
@@ -27,7 +24,7 @@ class USPSApiError(Exception):
 
 class USPSApi(object):
 
-    def __init__(self,  api_user_id: str, session: aiohttp.ClientSession, test: bool=False):
+    def __init__(self, api_user_id: str, session: aiohttp.ClientSession, test: bool = False):
         """USPS API client.
 
         :param api_user_id: A user ID for the USPS API. More detail is available on the USPS website: https://www.usps.com/business/web-tools-apis/
@@ -85,10 +82,10 @@ class USPSApi(object):
             raise USPSApiError(response['Error']['Description'], response=response)
         return response
 
-    def _build_xml(
+    def _build_address_xml(
             self, addresses: Iterable[Address], request_type: str,
             empty_fields: Iterable[str], required_fields: Iterable[str] = (),
-            chunk_length: int = 5, prefix=''
+            chunk_length: int = ApiQueryLimits.ADDRESSES, prefix=''
     ) -> Iterable[etree.Element]:
         """Generate XML structure for a request
 
@@ -120,89 +117,28 @@ class USPSApi(object):
         # It's undocumented, but the USPS API will only validate 5 addresses
         # at a time. As such, we need to chunk the addresses into groups of
         # 5 and do calls for 5 addresses at a time.
-        for xml in self._build_xml(addresses, 'AddressValidateRequest', ['name', 'phone']):
+        for xml in self._build_address_xml(addresses, 'AddressValidateRequest', ['name', 'phone']):
             response = await self.send_request(UspsEndpoint.VALIDATE, xml)
             for result in response['AddressValidateResponse']:
                 yield result
 
     async def lookup_zip_code(self, addresses: Iterable[Address]):
-        for xml in self._build_xml(addresses, 'ZipCodeLookupRequest', ['name', 'phone'], ['address_2']):
+        for xml in self._build_address_xml(addresses, 'ZipCodeLookupRequest', ['name', 'phone'], ['address_2']):
             response = await self.send_request(UspsEndpoint.VALIDATE, xml)
             for result in response['ZipCodeLookupResponse']:
                 yield result
 
     async def lookup_city_state(self, addresses: Iterable[Address]):
-        for xml in self._build_xml(addresses, 'CityStateLookup', CITY_STATE_LOOKUP_EMPTY_FIELDS, ['zip']):
+        for xml in self._build_address_xml(addresses, 'CityStateLookup', CITY_STATE_LOOKUP_EMPTY_FIELDS, ['zip']):
             response = await self.send_request(UspsEndpoint.CITY_STATE_LOOKUP, xml)
             for result in response['CityStateLookupResponse']:
                 yield result
 
-
-
-    def track(self, *args, **kwargs):
-        return TrackingInfo(self, *args, **kwargs)
-
-    def create_label(self, *args, **kwargs):
-        return ShippingLabel(self, *args, **kwargs)
-
-
-class TrackingInfo(object):
-
-    def __init__(self, usps, tracking_number):
-        xml = etree.Element('TrackFieldRequest', {'USERID': usps.api_user_id})
-        child = etree.SubElement(xml, 'TrackID', {'ID': tracking_number})
-
-        self.result = usps.send_request('tracking', xml)
-
-
-class ShippingLabel(object):
-
-    def __init__(self, usps, to_address, from_address, weight,
-                 service=SERVICE_PRIORITY, label_type=LABEL_ZPL):
-        root = 'eVSRequest' if not usps.test else 'eVSCertifyRequest'
-        xml = etree.Element(root, {'USERID': usps.api_user_id})
-
-        label_params = etree.SubElement(xml, 'ImageParameters')
-        label = etree.SubElement(label_params, 'ImageParameter')
-        label.text = label_type
-
-        from_address.add_to_xml(xml, prefix='From', validate=False)
-        to_address.add_to_xml(xml, prefix='To', validate=False)
-
-        package_weight = etree.SubElement(xml, 'WeightInOunces')
-        package_weight.text = str(weight)
-
-        delivery_service = etree.SubElement(xml, 'ServiceType')
-        delivery_service.text = service
-
-        etree.SubElement(xml, 'Width')
-        etree.SubElement(xml, 'Length')
-        etree.SubElement(xml, 'Height')
-        etree.SubElement(xml, 'Machinable')
-        etree.SubElement(xml, 'ProcessingCategory')
-        etree.SubElement(xml, 'PriceOptions')
-        etree.SubElement(xml, 'InsuredAmount')
-        etree.SubElement(xml, 'AddressServiceRequested')
-        etree.SubElement(xml, 'ExpressMailOptions')
-        etree.SubElement(xml, 'ShipDate')
-        etree.SubElement(xml, 'CustomerRefNo')
-        etree.SubElement(xml, 'ExtraServices')
-        etree.SubElement(xml, 'HoldForPickup')
-        etree.SubElement(xml, 'OpenDistribute')
-        etree.SubElement(xml, 'PermitNumber')
-        etree.SubElement(xml, 'PermitZIPCode')
-        etree.SubElement(xml, 'PermitHolderName')
-        etree.SubElement(xml, 'CRID')
-        etree.SubElement(xml, 'MID')
-        etree.SubElement(xml, 'LogisticsManagerMID')
-        etree.SubElement(xml, 'VendorCode')
-        etree.SubElement(xml, 'VendorProductVersionNumber')
-        etree.SubElement(xml, 'SenderName')
-        etree.SubElement(xml, 'SenderEMail')
-        etree.SubElement(xml, 'RecipientName')
-        etree.SubElement(xml, 'RecipientEMail')
-        etree.SubElement(xml, 'ReceiptOption')
-        image = etree.SubElement(xml, 'ImageType')
-        image.text = 'PDF'
-
-        self.result = usps.send_request('label', xml)
+    async def track(self, tracking_numbers: Iterable[str]):
+        for chunk in enumerated_chunker(tracking_numbers, ApiQueryLimits.TRACKING):
+            xml = etree.Element('TrackRequest', {'USERID': self.api_user_id})
+            for _, tracking_number in chunk:
+                etree.SubElement(xml, "TrackID", {"ID": tracking_number})
+            response = await self.send_request(UspsEndpoint.TRACKING, xml)
+            for result in response['TrackResults']:
+                yield result
