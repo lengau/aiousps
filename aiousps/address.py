@@ -80,5 +80,3 @@ class Address(object):
         if empty_fields:
             fields_str = ', '.join(empty_fields)
             raise ValueError(f'Mandatory fields not filled: {fields_str}')
-
-

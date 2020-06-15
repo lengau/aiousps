@@ -2,13 +2,11 @@
 import re
 import string
 
-from hypothesis import given
-from hypothesis import strategies
 import pytest
+from hypothesis import given
 from lxml import etree
 
-from aiousps import Address, constants
-
+from aiousps import constants
 from .constants import *
 
 
@@ -26,7 +24,8 @@ from .constants import *
         strategies.sampled_from(string.ascii_letters + string.digits + '_'),
         min_size=1
     ).filter(
-        lambda x: re.fullmatch(r'([_a-z][\w]?|[a-w_yz][\w]{2,}|[_a-z][a-l_n-z\d][\w]+|[_a-z][\w][a-k_m-z\d][\w]*)', x, re.IGNORECASE)
+        lambda x: re.fullmatch(r'([_a-z][\w]?|[a-w_yz][\w]{2,}|[_a-z][a-l_n-z\d][\w]+|[_a-z][\w][a-k_m-z\d][\w]*)', x,
+                               re.IGNORECASE)
     ),
 )
 def test_create_xml_works(name, company, address_1, address_2, city, state, zipcode, zipcode_ext, phone, prefix):
@@ -45,7 +44,6 @@ def xml_root():
     ('address', 'prefix', 'expected'), CREATE_XML_VALUES
 )
 def test_create_xml_expected_text(address, xml_root, prefix, expected):
-
     address.add_to_xml(xml_root, prefix)
     actual = etree.tostring(xml_root, encoding=constants.USPS_ENCODING)
 

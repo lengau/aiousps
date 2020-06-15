@@ -1,9 +1,9 @@
 """Unit tests for API"""
 from unittest import mock
 
+import pytest
 from hypothesis import given
 from hypothesis import strategies
-import pytest
 from lxml import etree
 
 from aiousps import USPSApi, USPSApiError, UspsEndpoint
@@ -38,6 +38,7 @@ def test_init(test, endpoint_value, uid):
 @pytest.fixture
 def api():
     return USPSApi('xxxxxxx', mock.AsyncMock(), False)
+
 
 @pytest.fixture
 def test_api():
@@ -94,6 +95,6 @@ class TestSendRequest:
     ]
 )
 def test_build_validate_xml(api, addresses, xml_serializations):
-    builder = api._build_xml(addresses, 'AddressValidateRequest', [])
+    builder = api._build_address_xml(addresses, 'AddressValidateRequest', [])
     actual = [etree.tostring(i) for i in builder]
     assert xml_serializations == actual

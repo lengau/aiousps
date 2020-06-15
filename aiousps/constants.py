@@ -1,5 +1,4 @@
 import enum
-from typing import Literal, Mapping
 
 USPS_ENCODING = 'iso-8859-1'
 
@@ -13,9 +12,14 @@ SERVICE_PARCEL_SELECT = 'PARCEL SELECT GROUND'
 
 USPS_BASE_URL = 'https://secure.shippingapis.com/ShippingAPI.dll'
 
+
 class UspsEndpoint(enum.Enum):
     TRACKING = 'TrackV2{test}'
     LABEL = 'eVS{test}'
     VALIDATE = 'Verify'
     CITY_STATE_LOOKUP = 'CityStateLookup'
     ZIP_CODE_LOOKUP = 'ZipCodeLookup'
+
+
+MAX_ADDRESSES_PER_TRANSACTION = 5
+

@@ -17,7 +17,8 @@ SAMPLE_ADDRESSES = (  # These addresses are based on the sample addresses given 
     Address('', '8 Wildwood Drive', 'Old Lyme', 'CT'),
     Address('', '8 Wildwood Drive', 'Old Lyme', 'CT', '06371', name='Name', company='Company', phone='+1-555-555-5555'),
     Address('', '1390 Market Street', 'Houston', 'TX', '77058', '1234'),
-    Address('', '1390 Market Street', 'Houston', 'TX', '77058', '1234', name='Name', company='Company', phone='+1-555-555-5555'),
+    Address('', '1390 Market Street', 'Houston', 'TX', '77058', '1234', name='Name', company='Company',
+            phone='+1-555-555-5555'),
     Address('', '1390 Market Street', '', '', '77058'),
     Address('', '1390 Market Street', '', '', '77058', name='Name', company='Company', phone='+1-555-555-5555'),
     # The following addresses are additional addresses made to make sure we're correctly serializing all addresses.
