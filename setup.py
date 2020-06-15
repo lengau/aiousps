@@ -30,7 +30,10 @@ setup(
     ],
     keywords='usps shipping',
     long_description=open('README.rst', 'r').read(),
-    install_requires=['dataclasses', 'requests', 'lxml', 'xmltodict'],
+    install_requires=['requests', 'lxml', 'xmltodict'],
+    extras_require={
+        ':python_version == "3.6"': ['dataclasses']
+    },
     tests_require=['coverage', 'hypothesis', 'pytest', 'pytest-cov', 'pytest-asyncio'],
     zip_safe=False,
 )
