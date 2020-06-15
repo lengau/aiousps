@@ -1,60 +1,70 @@
+"""Old tests from the original usps-api. These should be considered deprecated and should be replaced with new tests."""
+
+import asyncio
+
 import mock
 
 from lxml import etree
 
 from unittest import TestCase
 
-from .address import Address
-from .usps import USPSApi, USPSApiError
+from aiousps.address import Address
+from aiousps.usps import USPSApi, USPSApiError
 
 
 class USPSApiTestCase(TestCase):
 
     def setUp(self):
-        self.usps = USPSApi('XXXXXXXXXXXX', test=True)
+        self.usps = USPSApi('XXXXXXXXXXXX', tests=True)
 
     def test_get_url(self):
         self.assertEqual(
-            self.usps.get_url('tracking', 'test'),
+            self.usps.get_url('tracking', 'tests'),
             'https://secure.shippingapis.com/ShippingAPI.dll?API=TrackV2Certify&XML=test'
         )
         self.assertEqual(
-            self.usps.get_url('label', 'test'),
+            self.usps.get_url('label', 'tests'),
             'https://secure.shippingapis.com/ShippingAPI.dll?API=eVSCertify&XML=test'
         )
         self.assertEqual(
-            self.usps.get_url('validate', 'test'),
+            self.usps.get_url('validate', 'tests'),
             'https://secure.shippingapis.com/ShippingAPI.dll?API=Verify&XML=test'
         )
-        usps = USPSApi('XXXXXXXXXXXX', test=False)
+        usps = USPSApi('XXXXXXXXXXXX', tests=False)
         self.assertEqual(
-            usps.get_url('tracking', 'test'),
+            usps.get_url('tracking', 'tests'),
             'https://secure.shippingapis.com/ShippingAPI.dll?API=TrackV2&XML=test'
         )
         self.assertEqual(
-            usps.get_url('label', 'test'),
+            usps.get_url('label', 'tests'),
             'https://secure.shippingapis.com/ShippingAPI.dll?API=eVS&XML=test'
         )
         self.assertEqual(
-            usps.get_url('validate', 'test'),
+            usps.get_url('validate', 'tests'),
             'https://secure.shippingapis.com/ShippingAPI.dll?API=Verify&XML=test'
         )
-    
-    @mock.patch('requests.get')
-    def test_send_request_error(self, requests_mock):
-        requests_mock.return_value.content = b'<Error><Description>Test Error</Description></Error>'
+
+    @mock.patch('aiohttp.ClientSession')
+    def test_send_request_error(self, session_class_mock):
+        session_mock = session_class_mock.return_value.__aenter__.return_value
+        response_mock = session_mock.get.return_value
+        response_mock.text.return_value = b'<Error><Description>Test Error</Description></Error>'
         with self.assertRaises(USPSApiError):
-            self.usps.send_request('tracking', etree.Element('asdf'))
+            asyncio.run(
+                self.usps.send_request('tracking', etree.Element('asdf')))
 
-    @mock.patch('requests.get')
-    def test_send_request_valid(self, requests_mock):
-        requests_mock.return_value.content = b'<Valid>test</Valid>'
-        response = self.usps.send_request('tracking', etree.Element('asdf'))
-        self.assertEqual(response, {'Valid': 'test'})
+    @mock.patch('aiohttp.ClientSession')
+    def test_send_request_valid(self, session_class_mock):
+        session_mock = session_class_mock.return_value.__aenter__.return_value
+        response_mock = session_mock.get.return_value
+        response_mock.text.return_value = b'<Valid>tests</Valid>'
+        response = asyncio.run(
+            self.usps.send_request('tracking', etree.Element('asdf')))
+        self.assertEqual(response, {'Valid': 'tests'})
 
-    @mock.patch('usps.usps.AddressValidate.__init__')
-    @mock.patch('usps.usps.TrackingInfo.__init__')
-    @mock.patch('usps.usps.ShippingLabel.__init__')
+    @mock.patch('aiousps.aiousps.AddressValidate.__init__')
+    @mock.patch('aiousps.aiousps.TrackingInfo.__init__')
+    @mock.patch('aiousps.aiousps.ShippingLabel.__init__')
     def test_wrapper_methods(self, address_mock, track_mock, ship_mock):
         address_mock.return_value = None
         track_mock.return_value = None
@@ -70,7 +80,7 @@ class USPSApiTestCase(TestCase):
 
 
 class AddressTestCase(TestCase):
-    
+
     def test_address_xml(self):
         address = Address('Test', '123 Test St.', 'Test', 'NE', '55555')
         root = etree.Element('Test')

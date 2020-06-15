@@ -1,17 +1,17 @@
 import codecs
 import os
 import re
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 setup(
-    name='usps-api',
-    version='0.4',
-    author='Tobin Brown',
-    author_email='tobin@brobin.me',
-    packages=['usps'],
+    name='aiousps',
+    version='0.1',
+    author='Alex Lowe',
+    author_email='amlowe@lengau.net',
+    packages=find_packages(),
     include_package_data=True,
-    url='http://github.com/brobin/usps-api',
+    url='http://github.com/lengau/usps-api',
     license='MIT',
     description='Python wrapper for the USPS API',
     classifiers=[
@@ -21,7 +21,6 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -32,6 +31,6 @@ setup(
     keywords='usps shipping',
     long_description=open('README.rst', 'r').read(),
     install_requires=['requests', 'lxml', 'xmltodict'],
-    tests_require=['coverage', 'mock'],
+    tests_require=['coverage', 'hypothesis', 'pytest', 'pytest-cov', 'pytest-asyncio'],
     zip_safe=False,
 )

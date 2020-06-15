@@ -1,20 +1,22 @@
-========
-USPS API
-========
+==============
+async USPS API
+==============
 
 |python| |coverage| |license|
 
 -------------------
 
-This is a simple Python wrapper for the USPS API. Instead of having to deal with XML, use this library and receive nicely formatted JSON back while tracking shipments, creating shipments, and validating addresses.
+This is a simple async Python wrapper for the USPS API. It was forked from the `usps-api <https://github.com/BuluBox/usps-api>`_ project to make an async version. Instead of having to deal with XML, use this library and receive well formatted dictionaries back for tracking shipments, creating shipments, and validating addresses.
 
 ------------
 Installation
 ------------
 
+NOTE: ``aiousps`` is not yet published on pypi, so you'll have to install from source.
+
 To install usps-api, use pip::
 
-    pip install usps-api
+    pip install aiousps
 
 Or to install from source::
 
@@ -24,7 +26,9 @@ Or to install from source::
 Configuration
 -------------
 
-Note: In order to use any of these APIs, you need to register with USPS and get a `USERID` https://www.usps.com/business/web-tools-apis/welcome.htm. For the create_shipment endpoint, you will also need to request further permissions by emailing uspstechnicalsupport@mailps.custhelp.com about Label API access.
+Note: In order to use any of these APIs, you need to register with USPS and get a `USERID <https://www.usps.com/business/web-tools-apis/welcome.htm>`_. For the create_shipment endpoint, you will also need to request further permissions by emailing uspstechnicalsupport@mailps.custhelp.com about Label API access.
+
+The USPS developer guide is available at https://www.usps.com/business/web-tools-apis/general-api-developer-guide.htm
 
 -----
 Usage
@@ -46,7 +50,7 @@ Track Shipments
 Create Shipment
 ---------------
 
-The `create_shipment` function needs a to and from address, weight (in ounces), service type and label type. Service types and lable types can be found in `usps/constants.py`. Defaults are `SERVICE_PRIORITY` and `LABEL_ZPL`.
+The ``create_shipment`` function needs a to and from address, weight (in ounces), service type and label type. Service types and lable types can be found in ``usps/constants.py``. Defaults are ``SERVICE_PRIORITY`` and ``LABEL_ZPL``.
 
 .. code-block:: python
 
