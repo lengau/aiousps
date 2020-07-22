@@ -51,6 +51,17 @@ SAMPLE_VALIDATION_ADDRESSES = (
 )
 
 SAMPLE_VALIDATION_SERIALIZATIONS = [
-    b'<AddressValidateRequest USERID="xxxxxxx"><Address ID="0"><Address2>6406 Ivy Lane</Address2><City>Greenbelt</City><State>MD</State></Address><Address ID="1"><FirmName>Name</FirmName><Address2>6406 Ivy Lane</Address2><City>Greenbelt</City><State>MD</State><Zip5>20770</Zip5></Address><Address ID="2"><Address1>6406 Ivy Lane</Address1><City>Greenbelt</City><State>MD</State></Address><Address ID="3"><Address2>8 Wildwood Drive</Address2><City>Old Lyme</City><State>CT</State></Address><Address ID="4"><FirmName>Company</FirmName><Address2>1390 Market Street</Address2><City>Houston</City><State>TX</State><Zip5>77058</Zip5><Zip4>1234</Zip4></Address></AddressValidateRequest>',
-    b'<AddressValidateRequest USERID="xxxxxxx"><Address ID="5"><FirmName>Company</FirmName><Address2>1390 Market Street</Address2><Zip5>77058</Zip5></Address><Address ID="6"><Address1>1 Main Street</Address1><Address2>Apartment 1</Address2><City>New York</City><State>NY</State></Address><Address ID="7"><Address1>Suite K</Address1><Address2>29851 Adventura</Address2><State>CA</State><Zip5>92688</Zip5></Address></AddressValidateRequest>'
+    b'<AddressValidateRequest USERID="xxxxxxx"><Revision>1</Revision>'
+    b'<Address ID="0"><FirmName/><Address1></Address1><Address2>6406 Ivy Lane</Address2><City>Greenbelt</City><State>MD</State><Zip5/><Zip4/></Address>'
+    b'<Address ID="1"><FirmName>Name</FirmName><Address1></Address1><Address2>6406 Ivy Lane</Address2><City>Greenbelt</City><State>MD</State><Zip5>20770</Zip5><Zip4/></Address>'
+    b'<Address ID="2"><FirmName/><Address1>6406 Ivy Lane</Address1><Address2></Address2><City>Greenbelt</City><State>MD</State><Zip5/><Zip4/></Address>'
+    b'<Address ID="3"><FirmName/><Address1></Address1><Address2>8 Wildwood Drive</Address2><City>Old Lyme</City><State>CT</State><Zip5/><Zip4/></Address>'
+    b'<Address ID="4"><FirmName>Company</FirmName><Address1></Address1><Address2>1390 Market Street</Address2><City>Houston</City><State>TX</State><Zip5>77058</Zip5><Zip4>1234</Zip4></Address>'
+    b'</AddressValidateRequest>',
+
+    b'<AddressValidateRequest USERID="xxxxxxx"><Revision>1</Revision>'
+    b'<Address ID="5"><FirmName>Company</FirmName><Address1></Address1><Address2>1390 Market Street</Address2><City></City><State></State><Zip5>77058</Zip5><Zip4/></Address>'
+    b'<Address ID="6"><FirmName/><Address1>1 Main Street</Address1><Address2>Apartment 1</Address2><City>New York</City><State>NY</State><Zip5/><Zip4/></Address>'
+    b'<Address ID="7"><FirmName/><Address1>Suite K</Address1><Address2>29851 Adventura</Address2><City></City><State>CA</State><Zip5>92688</Zip5><Zip4/></Address>'
+    b'</AddressValidateRequest>'
 ]

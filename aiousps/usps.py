@@ -5,7 +5,7 @@ import xmltodict
 from lxml import etree
 
 from . import Address
-from .constants import ApiQueryLimits, LABEL_ZPL, SERVICE_PRIORITY, USPS_BASE_URL, \
+from .constants import ApiQueryLimits, LABEL_ZPL, RequiredFields, SERVICE_PRIORITY, USPS_API_REVISION, USPS_BASE_URL, \
     USPS_ENCODING, UspsEndpoint
 from .helpers import enumerated_chunker
 
@@ -28,7 +28,7 @@ class USPSApi(object):
         """USPS API client.
 
         :param api_user_id: A user ID for the USPS API. More detail is available on the USPS website: https://www.usps.com/business/web-tools-apis/
-        :param session: An aiohttp ClientSession object. Specifics for compatible session objects tan be viewed in the `send_request` method.
+        :param session: An aiohttp ClientSession object. Specifics for compatible session objects can be viewed in the `send_request` method.
         :param test: A boolean of whether this is a test run or not. Test runs will use API endpoints that don't write to the database.
         """
         self.api_user_id = api_user_id
@@ -76,7 +76,7 @@ class USPSApi(object):
             url=USPS_BASE_URL,
             data={'API': api, 'XML': xml}
         )
-        xml_response = await response.text(encoding='iso-8859-1')
+        xml_response = await response.text(encoding=USPS_ENCODING)
         response = xmltodict.parse(xml_response)
         if 'Error' in response:
             raise USPSApiError(response['Error']['Description'], response=response)
@@ -99,11 +99,13 @@ class USPSApi(object):
         """
         for chunk in enumerated_chunker(addresses, chunk_length):
             xml = etree.Element(request_type, {'USERID': self.api_user_id})
+            revision = etree.SubElement(xml, 'Revision')
+            revision.text = USPS_API_REVISION
             for i, addr in chunk:
                 addr.assert_empty(*empty_fields)
                 addr.assert_filled(*required_fields)
                 _address = etree.SubElement(xml, 'Address', {'ID': str(i)})
-                addr.add_to_xml(_address, prefix=prefix)
+                addr.add_to_xml(_address, prefix=prefix, required_fields=RequiredFields.ADDRESS_VALIDATE)
             yield xml
 
     async def validate_addresses(self, addresses: Iterable[Address]):
@@ -119,19 +121,27 @@ class USPSApi(object):
         # 5 and do calls for 5 addresses at a time.
         for xml in self._build_address_xml(addresses, 'AddressValidateRequest', ['name', 'phone']):
             response = await self.send_request(UspsEndpoint.VALIDATE, xml)
-            for result in response['AddressValidateResponse']:
-                yield result
+            address_responses = response['AddressValidateResponse']['Address']
+            if isinstance(address_responses, list):
+                for result in address_responses:
+                    yield result
+            else:
+                yield address_responses
 
     async def lookup_zip_code(self, addresses: Iterable[Address]):
         for xml in self._build_address_xml(addresses, 'ZipCodeLookupRequest', ['name', 'phone'], ['address_2']):
             response = await self.send_request(UspsEndpoint.VALIDATE, xml)
-            for result in response['ZipCodeLookupResponse']:
-                yield result
+            address_responses = response['ZipCodeLookupResponse']['Address']
+            if isinstance(address_responses, list):
+                for result in address_responses:
+                    yield result
+            else:
+                yield address_responses
 
     async def lookup_city_state(self, addresses: Iterable[Address]):
         for xml in self._build_address_xml(addresses, 'CityStateLookup', CITY_STATE_LOOKUP_EMPTY_FIELDS, ['zip']):
             response = await self.send_request(UspsEndpoint.CITY_STATE_LOOKUP, xml)
-            for result in response['CityStateLookupResponse']:
+            for result in response['CityStateLookupResponse']['Address']:
                 yield result
 
     async def track(self, tracking_numbers: Iterable[str]):

@@ -2,7 +2,7 @@
 async USPS API
 ==============
 
-|python| |coverage| |license|
+|python| |build| |coverage| |license|
 
 -------------------
 
@@ -116,3 +116,5 @@ MIT. See `LICENSE`_ for more details.
 .. |python| image:: https://img.shields.io/pypi/pyversions/usps-api.svg?style=flat-square
     :target: https://pypi.python.org/pypi/usps-api
     :alt: Python 3.5, 3.6, 3.7, 3.8
+
+.. |build| image:: https://travis-ci.org/lengau/aiousps.svg?branch=master

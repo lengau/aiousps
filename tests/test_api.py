@@ -97,4 +97,5 @@ class TestSendRequest:
 def test_build_validate_xml(api, addresses, xml_serializations):
     builder = api._build_address_xml(addresses, 'AddressValidateRequest', [])
     actual = [etree.tostring(i) for i in builder]
-    assert xml_serializations == actual
+    for actual_item, expected in zip(actual, xml_serializations):
+        assert actual_item == expected

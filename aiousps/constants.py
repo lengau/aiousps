@@ -1,6 +1,7 @@
 import enum
 
 USPS_ENCODING = 'iso-8859-1'
+USPS_API_REVISION = '1'
 
 LABEL_IMAGE = '4X6LABEL'
 LABEL_ZPL = '4X6LABELZPL'
@@ -25,3 +26,8 @@ class ApiQueryLimits(enum.IntEnum):
     ADDRESSES = 5
     TRACKING = 35
 
+
+class RequiredFields:
+    ADDRESS_VALIDATE = (
+        'FirmName', 'Address1', 'Address2', 'City', 'State', 'Zip5', 'Zip4'
+    )
