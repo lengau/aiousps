@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='aiousps',
-    version='0.1.2',
+    version='0.1.3',
     author='Alex Lowe',
     author_email='amlowe@lengau.net',
     packages=find_packages(),
