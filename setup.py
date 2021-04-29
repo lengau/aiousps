@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='aiousps',
-    version='0.1.1',
+    version='0.1.2',
     author='Alex Lowe',
     author_email='amlowe@lengau.net',
     packages=find_packages(),
@@ -24,6 +24,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Software Development :: Testing',
         'Topic :: Utilities',
