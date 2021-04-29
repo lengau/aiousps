@@ -71,7 +71,7 @@ class USPSApi(object):
         (see https://www.usps.com/business/web-tools-apis/general-api-developer-guide.htm)
         """
         api = self.get_endpoint(action)
-        xml = etree.tostring(xml, encoding=USPS_ENCODING, pretty_print=self.test).decode()
+        xml = etree.tostring(xml, encoding=USPS_ENCODING, pretty_print=self.test).decode(USPS_ENCODING)
         response = await self.session.post(
             url=USPS_BASE_URL,
             data={'API': api, 'XML': xml}
